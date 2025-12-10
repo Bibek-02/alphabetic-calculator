@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use("/api/calc", calcRoutes);
 
-// sample route
+// example route
 app.get('/', (req, res) => {
   res.json({status: "OK", message: 'Alphabetic Calculator API is running'})
 });

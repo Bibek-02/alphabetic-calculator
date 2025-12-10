@@ -27,7 +27,7 @@ async function calculate(req, res, next) {
     // 3. Evaluate numeric expression (placeholder for now)
     const result = evaluateNumericExpression(numericExpression);
 
-    // 4. (Optional) convert result back to letters
+    // 4. convert result back to letters
     const resultInLetters =
       typeof result === "number"
         ? numbersToLetters(String(result))
