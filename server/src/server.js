@@ -1,27 +1,36 @@
 // server/src/server.js
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const calcRoutes = require("./routes/calcRoutes");
 
-dotenv.config(); // load environment variables from .env file
+import { connectDB } from "./config/db.js";
+import calcRoutes from "./routes/calcRoutes.js";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// global middleware
+// Global middleware
 app.use(cors());
 app.use(express.json());
 
-
+// Routes
 app.use("/api/calc", calcRoutes);
 
-// example route
-app.get('/', (req, res) => {
-  res.json({status: "OK", message: 'Alphabetic Calculator API is running'})
+// Health check route
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Alphabetic Calculator API is running",
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Connect DB, then start server
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
 });

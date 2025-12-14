@@ -1,10 +1,10 @@
-// src/utils/calcEngine.test.js
-const assert = require("assert");
-const {
+import assert from "assert";
+
+import {
   evaluateNumericExpression,
   CalcError,
   ERR,
-} = require("./calcEngine");
+} from "./calcEngine.js";
 
 function expectError(expr, code) {
   try {
@@ -23,7 +23,7 @@ assert.strictEqual(evaluateNumericExpression("2*3"), 6);
 assert.strictEqual(evaluateNumericExpression("8/2"), 4);
 assert.strictEqual(evaluateNumericExpression("8%3"), 2);
 
-// ✅ Precedence
+// ✅ Operator precedence
 assert.strictEqual(evaluateNumericExpression("1+2*3"), 7);
 assert.strictEqual(evaluateNumericExpression("(1+2)*3"), 9);
 
@@ -31,8 +31,11 @@ assert.strictEqual(evaluateNumericExpression("(1+2)*3"), 9);
 assert.strictEqual(evaluateNumericExpression("3^2"), 9);
 assert.strictEqual(evaluateNumericExpression("2^3^2"), 512); // 2^(3^2)
 
-// ✅ Mixed
-assert.strictEqual(evaluateNumericExpression("1 + 2 * (3 ^ 2)"), 19);
+// ✅ Mixed expressions
+assert.strictEqual(
+  evaluateNumericExpression("1 + 2 * (3 ^ 2)"),
+  19
+);
 
 // ✅ Unary operators
 assert.strictEqual(evaluateNumericExpression("-3+5"), 2);
