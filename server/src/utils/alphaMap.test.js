@@ -1,14 +1,15 @@
-// src/utils/alphaMap.test.js
+// server/src/utils/alphaMap.test.js
+import assert from "assert";
 
-const assert = require("assert");
-const {
+import {
   lettersToNumbers,
   numbersToLetters,
-} = require("./alphaMap");
-const {
+} from "./alphaMap.js";
+
+import {
   normalizeAndValidateExpression,
   isValidExpression,
-} = require("./validator");
+} from "./validator.js";
 
 // --- lettersToNumbers tests ---
 
@@ -27,7 +28,7 @@ assert.strictEqual(
   "1 + 2 * 3"
 );
 
-// Already lowercase enforced
+// Uppercase input normalization
 assert.strictEqual(
   lettersToNumbers("A + Ø"),
   "1 + 0"
@@ -55,7 +56,7 @@ assert.strictEqual(
 
 assert.ok(isValidExpression("a + b - c"));
 assert.ok(isValidExpression("ø + a"));
-assert.ok(isValidExpression("0 + a")); // if you allow literal 0
+assert.ok(isValidExpression("0 + a")); // literal 0 allowed
 
 // Invalid expressions
 assert.strictEqual(isValidExpression("j + a"), false);
@@ -69,4 +70,4 @@ try {
   assert.strictEqual(err.code, "INVALID_EXPRESSION_CHARACTERS");
 }
 
-console.log("All alphaMap / validator tests passed!");
+console.log("✅ All alphaMap / validator tests passed!");
