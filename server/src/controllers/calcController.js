@@ -1,4 +1,5 @@
-// server/src/controllers/calcController.js
+import Calculation from "../models/Calculation.js";
+
 import {
   lettersToNumbers,
   numbersToLetters,
@@ -8,39 +9,56 @@ import {
   normalizeAndValidateExpression,
 } from "../utils/validator.js";
 
-// Placeholder safe evaluator – DO NOT use eval()
-function evaluateNumericExpression(expr) {
-  const error = new Error("Numeric evaluation not implemented yet");
-  error.code = "EVAL_NOT_IMPLEMENTED";
-  throw error;
-}
+import {
+  evaluateNumericExpression,
+} from "../utils/calcEngine.js";
 
-export async function calculate(req, res, next) {
+export async function calculate(req, res) {
   try {
     const { expression } = req.body;
 
-    const normalizedExpression =
+    if (!expression) {
+      return res.status(400).json({
+        success: false,
+        error: "EXPRESSION_REQUIRED",
+      });
+    }
+
+    // 1. Normalize & validate
+    const normalized =
       normalizeAndValidateExpression(expression);
 
+    // 2. Letters → numbers
     const numericExpression =
-      lettersToNumbers(normalizedExpression);
+      lettersToNumbers(normalized);
 
-    const result =
+    // 3. SAFE evaluation (your engine)
+    const resultNumeric =
       evaluateNumericExpression(numericExpression);
 
-    const resultInLetters =
-      typeof result === "number"
-        ? numbersToLetters(String(result))
-        : null;
+    // 4. Numbers → letters
+    const resultAlphabetic =
+      numbersToLetters(resultNumeric);
 
-    res.json({
-      ok: true,
-      expression: normalizedExpression,
+    // 5. Save to DB
+    const record = await Calculation.create({
+      originalExpression: expression,
       numericExpression,
-      result,
-      resultInLetters,
+      resultNumeric,
+      resultAlphabetic,
     });
+
+    return res.status(200).json({
+      originalExpression: record.originalExpression,
+      numericExpression: record.numericExpression,
+      resultNumeric: record.resultNumeric,
+      resultAlphabetic: record.resultAlphabetic,
+    });
+
   } catch (err) {
-    next(err);
+    return res.status(400).json({
+      success: false,
+      error: err.code || err.message || "CALCULATION_FAILED",
+    });
   }
 }
