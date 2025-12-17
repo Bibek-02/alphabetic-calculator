@@ -1,49 +1,74 @@
 // server/src/utils/validator.js
-// The /i flag allows uppercase letters; we normalize to lowercase later.
+
 export const ALLOWED_CHARS_REGEX = /^[a-iø0+\-*/%^()\s]+$/i;
 
-/**
- * Normalize an incoming expression:
- * - Ensure it's a string
- * - Trim outer whitespace
- * - Convert to lowercase
- * - Validate allowed characters
- *
- * Returns the normalized expression or throws an Error on invalid input.
- */
+const MAX_LENGTH = 500;
+const MAX_PAREN_DEPTH = 25;
+
+function validationError(code, message) {
+  const err = new Error(message);
+  err.code = code;
+  err.status = 400;
+  return err;
+}
+
 export function normalizeAndValidateExpression(rawInput) {
   if (typeof rawInput !== "string") {
-    const error = new Error("Input expression must be a string");
-    error.status = 400;
-    error.code = "INVALID_INPUT_TYPE";
-    throw error;
+    throw validationError(
+      "INVALID_INPUT_TYPE",
+      "Input expression must be a string"
+    );
   }
 
-  const trimmed = rawInput.trim();
-  const normalized = trimmed.toLowerCase();
+  const normalized = rawInput.trim().toLowerCase();
 
   if (!normalized) {
-    const error = new Error("Expression cannot be empty");
-    error.status = 400;
-    error.code = "EMPTY_EXPRESSION";
-    throw error;
+    throw validationError(
+      "EMPTY_EXPRESSION",
+      "Expression cannot be empty"
+    );
+  }
+
+  if (normalized.length > MAX_LENGTH) {
+    throw validationError(
+      "EXPRESSION_TOO_LARGE",
+      "Expression is too long"
+    );
   }
 
   if (!ALLOWED_CHARS_REGEX.test(normalized)) {
-    const error = new Error(
-      "Expression contains invalid characters. Allowed: letters a–i, ø, digit 0, operators + - * / % ^, parentheses, and spaces."
+    throw validationError(
+      "INVALID_EXPRESSION_CHARACTERS",
+      "Expression contains invalid characters"
     );
-    error.status = 400;
-    error.code = "INVALID_EXPRESSION_CHARACTERS";
-    throw error;
+  }
+
+  // 🚫 Only operators (no values)
+  if (!/[a-iø0]/.test(normalized)) {
+    throw validationError(
+      "ONLY_OPERATORS",
+      "Expression must contain at least one value"
+    );
+  }
+
+  // 🧠 Parentheses depth check
+  let depth = 0;
+  for (const char of normalized) {
+    if (char === "(") depth++;
+    if (char === ")") depth--;
+    if (depth > MAX_PAREN_DEPTH) {
+      throw validationError(
+        "PARENTHESIS_TOO_DEEP",
+        "Expression nesting is too deep"
+      );
+    }
   }
 
   return normalized;
 }
 
 /**
- * Simple boolean validation helper.
- * Returns true if valid, false otherwise.
+ * Boolean helper
  */
 export function isValidExpression(rawInput) {
   try {

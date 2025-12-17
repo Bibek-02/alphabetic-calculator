@@ -1,3 +1,4 @@
+// src/controllers/calcController.js
 import Calculation from "../models/Calculation.js";
 
 import {
@@ -13,52 +14,48 @@ import {
   evaluateNumericExpression,
 } from "../utils/calcEngine.js";
 
-export async function calculate(req, res) {
-  try {
-    const { expression } = req.body;
+/**
+ * POST /api/calculate
+ */
+export async function calculate(req, res, next) {
+  const { expression } = req.body;
 
-    if (!expression) {
-      return res.status(400).json({
-        success: false,
-        error: "EXPRESSION_REQUIRED",
-      });
-    }
-
-    // 1. Normalize & validate
-    const normalized =
-      normalizeAndValidateExpression(expression);
-
-    // 2. Letters → numbers
-    const numericExpression =
-      lettersToNumbers(normalized);
-
-    // 3. SAFE evaluation (your engine)
-    const resultNumeric =
-      evaluateNumericExpression(numericExpression);
-
-    // 4. Numbers → letters
-    const resultAlphabetic =
-      numbersToLetters(resultNumeric);
-
-    // 5. Save to DB
-    const record = await Calculation.create({
-      originalExpression: expression,
-      numericExpression,
-      resultNumeric,
-      resultAlphabetic,
-    });
-
-    return res.status(200).json({
-      originalExpression: record.originalExpression,
-      numericExpression: record.numericExpression,
-      resultNumeric: record.resultNumeric,
-      resultAlphabetic: record.resultAlphabetic,
-    });
-
-  } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: err.code || err.message || "CALCULATION_FAILED",
-    });
+  if (!expression) {
+    const err = new Error("Expression is required");
+    err.code = "EXPRESSION_REQUIRED";
+    err.status = 400;
+    throw err;
   }
+
+  // 1️⃣ Normalize & validate (may throw)
+  const normalized =
+    normalizeAndValidateExpression(expression);
+
+  // 2️⃣ Letters → numbers
+  const numericExpression =
+    lettersToNumbers(normalized);
+
+  // 3️⃣ Safe evaluation (may throw CalcError)
+  const resultNumeric =
+    evaluateNumericExpression(numericExpression);
+
+  // 4️⃣ Numbers → letters
+  const resultAlphabetic =
+    numbersToLetters(resultNumeric);
+
+  // 5️⃣ Persist result
+  const record = await Calculation.create({
+    originalExpression: expression,
+    numericExpression,
+    resultNumeric,
+    resultAlphabetic,
+  });
+
+  // ✅ Success response
+  res.status(200).json({
+    originalExpression: record.originalExpression,
+    numericExpression: record.numericExpression,
+    resultNumeric: record.resultNumeric,
+    resultAlphabetic: record.resultAlphabetic,
+  });
 }
