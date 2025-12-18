@@ -1,0 +1,58 @@
+
+.display {
+  height: 80px;
+  background: #000;
+  color: #fff;
+  font-size: 2.2rem;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.display-text {
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Calculator Container */
+.app {
+  min-height: 100vh;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calculator {
+  width: 320px;
+  background: #000;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.calc-button {
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: #222;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.calc-button:active {
+  transform: scale(0.95);
+  background: #333;
+}
