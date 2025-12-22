@@ -1,23 +1,29 @@
 // client/src/components/ButtonGrid.jsx
-import CalcButton from "./CalcButton";
+export default function ButtonGrid({ onInput, onClear, onEquals }) {
+  const buttons = [
+    "a","b","c","+",
+    "d","e","f","-",
+    "g","h","i","*",
+    "(",")","%","/",
+    "ø","^","C","="
+  ];
 
-const buttons = [
-  "a","b","c",
-  "d","e","f",
-  "g","h","i",
-  "Ø","(",")",
-  "/","%","^",
-  "C","="
-];
-
-function ButtonGrid() {
   return (
     <div className="button-grid">
-      {buttons.map(btn => (
-        <CalcButton key={btn} label={btn} />
-      ))}
+      {buttons.map((btn) => {
+        if (btn === "C")
+          return <button key={btn} onClick={onClear}>{btn}</button>;
+
+        if (btn === "=")
+          return <button key={btn} onClick={onEquals}>{btn}</button>;
+
+        return (
+          <button key={btn} onClick={() => onInput(btn)}>
+            {btn}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-export default ButtonGrid;
